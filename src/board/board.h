@@ -86,8 +86,10 @@
 /*
  * Port B setup:
  * Everything input with pull-up except:
+ * PB6 - Alternate O.D      (I2C1_SCL).
+ * PB7 - Alternate O.D      (i2C1_SDA).
  */
-#define VAL_GPIOBCRL            0x88888888      /*  PB7...PB0 */
+#define VAL_GPIOBCRL            0xFF888888      /*  PB7...PB0 */
 #define VAL_GPIOBCRH            0x88888888      /* PB15...PB8 */
 #define VAL_GPIOBODR            0xFFFFFFFF
 

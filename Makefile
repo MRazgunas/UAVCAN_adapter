@@ -5,7 +5,7 @@
 
 # Compiler options here.
 ifeq ($(USE_OPT),)	
-  USE_OPT = -O2 -ggdb -fomit-frame-pointer -falign-functions=16
+  USE_OPT = -O0 -ggdb -fomit-frame-pointer -falign-functions=16
   USE_OPT += -nodefaultlibs -lc -lgcc -lm
 endif
 
@@ -117,7 +117,7 @@ CSRC = $(STARTUPSRC) \
        $(PLATFORMSRC) \
        $(CHIBIOS)/os/various/syscalls.c \
        src/board/board.c \
-#       src/exceptionvectors.c
+       src/sys/exceptionvectors.c
 #       $(SHELLSRC) \
 #       $(STREAMSSRC) \
 
@@ -143,7 +143,8 @@ UDEFS += -DUAVCAN_STM32_CHIBIOS=1 \
 		 -DFW_VERSION_MAJOR=$(FW_VERSION_MAJOR) \
 		 -DFW_VERSION_MINOR=$(FW_VERSION_MINOR) \
 		 -DDEBUG_BUILD=1 \
-		 -DDISABLE_WATCHDOG=1
+		 -DDISABLE_WATCHDOG=1 \
+		 -DUAVCAN_TINY=1
 		 
 #UDEFS += -DSHELL_CONFIG_FILE
 		 

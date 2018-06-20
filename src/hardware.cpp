@@ -10,6 +10,12 @@
 
 namespace Hardware {
 
+    static const I2CConfig i2cfg1 = {
+        OPMODE_I2C,
+        400000,
+        FAST_DUTY_CYCLE_2,
+    };
+
     UUID readUniqueID()
     {
         UUID out_bytes;
@@ -38,6 +44,7 @@ namespace Hardware {
         wdt.reset();
 
         sdStart(&SD1, NULL);
+        i2cStart(&I2CD1, &i2cfg1);
 
         static os::stm32::ConfigStorageBackend config_storage_backend(ConfigStorageAddress, ConfigStorageSize);
         const int config_init_res = os::config::init(&config_storage_backend);

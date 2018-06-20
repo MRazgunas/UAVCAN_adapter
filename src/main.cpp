@@ -14,6 +14,7 @@
 #include "ch.hpp"
 #include "hal.h"
 #include "node.hpp"
+#include "driver_4525D.hpp"
 
 //#include "shell.h"
 //#include "chprintf.h"
@@ -117,7 +118,7 @@ auto onFirmwareUpdateRequestedFromUAVCAN(
 
     already_in_progress = true;
 
-    os::lowsyslog("UAVCAN firmware update initiated\n");
+    //os::lowsyslog("UAVCAN firmware update initiated\n");
     return uavcan::protocol::file::BeginFirmwareUpdate::Response::ERROR_OK;
 }
 
@@ -140,8 +141,15 @@ int main(void) {
 //   thread_t *shelltp = chThdCreateFromHeap(NULL, SHELL_WA_SIZE,
 //            "shell", NORMALPRIO + 1, shellThread, (void *)&shell_cfg1);
 
+    driver_4525D ms4525d(&I2CD1);
+    if(!ms4525d.init()) {
+        chSysHalt("Failed to init airspeed driver");
+    }
+
+
   while (true) {
       wdt.reset();
+      ms4525d.poll();
       chThdSleepMilliseconds(500);
   }
 }
