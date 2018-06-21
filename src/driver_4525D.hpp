@@ -17,6 +17,11 @@ private:
     systime_t _last_sample_time = 0;
     systime_t _measurement_started = 0;
 
+    float _psi_range = 1.0f;
+
+    float _last_pressure_pa = 0.0f; //Last measurement in Pa
+    float _last_temperature = 0.0f; //Last temperature measurement
+
     void _start_measurement() {
         _measurement_started = 0;
         i2cAcquireBus(_driver);
@@ -59,7 +64,25 @@ private:
             return;
         }
 
+        _last_pressure_pa = _get_pressure(dp);
+        _last_temperature = _get_temperature(temp);
+
         _last_sample_time = chVTGetSystemTime();
+    }
+
+    float _get_pressure(int16_t raw) const {
+        const float p_max = _psi_range;
+        const float p_min = -p_max;
+        const float psi_to_pa = 6894.757f;
+
+        float press_psi = -((raw - 0.1f*16383)*(p_max-p_min)/(0.8f*16383) + p_min);
+        float press_pa = press_psi * psi_to_pa;
+        return press_pa;
+    }
+
+    float _get_temperature(int16_t raw_t) const {
+        float temp = ((200.0f * raw_t) / 2047) - 50;
+        return temp;
     }
 
 public:
@@ -92,10 +115,30 @@ public:
             _start_measurement();
             return;
         }
-        if((systime_t)(chVTGetSystemTime() - _measurement_started) > MS2ST(10)) {
+        if((systime_t)(chVTGetSystemTime() - _measurement_started) > MS2ST(5)) {
             _get_data();
             _start_measurement();
         }
+    }
+
+    bool get_temperature(float &temp) {
+        if((systime_t)(chVTGetSystemTime() - _last_sample_time) > MS2ST(50)) {
+            return false;
+        }
+        temp = _last_temperature;
+        return true;
+    }
+
+    bool get_pressure(float &press) {
+        if((systime_t)(chVTGetSystemTime() - _last_sample_time) > MS2ST(100)) {
+            return false;
+        }
+        press = _last_pressure_pa;
+        return true;
+    }
+
+    void set_psi_range(float psi_range) {
+        _psi_range = psi_range;
     }
 };
 

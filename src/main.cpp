@@ -26,6 +26,8 @@
 #include <bootloader_interface/bootloader_interface.hpp>
 #include "os.hpp"
 
+#include <airspeed_sensor.hpp>
+
 
 //#define SHELL_WA_SIZE   THD_WORKING_AREA_SIZE(2048)
 //
@@ -141,15 +143,10 @@ int main(void) {
 //   thread_t *shelltp = chThdCreateFromHeap(NULL, SHELL_WA_SIZE,
 //            "shell", NORMALPRIO + 1, shellThread, (void *)&shell_cfg1);
 
-    driver_4525D ms4525d(&I2CD1);
-    if(!ms4525d.init()) {
-        chSysHalt("Failed to init airspeed driver");
+    airspeed_sensor::init();
+
+    while (true) {
+        wdt.reset();
+        chThdSleepMilliseconds(500);
     }
-
-
-  while (true) {
-      wdt.reset();
-      ms4525d.poll();
-      chThdSleepMilliseconds(500);
-  }
 }
