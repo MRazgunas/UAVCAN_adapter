@@ -57,10 +57,14 @@ public:
                 _driver.poll();
                 bool res = _driver.get_pressure(press);
                 _driver.get_temperature(temp);
-                temp += kelvin_offset;
 
-                publish(press, temp);
-
+                if(res) {
+                    temp += kelvin_offset;
+                    Node::getNode().setHealthOk();
+                    publish(press, temp);
+                } else {
+                    Node::getNode().setHealthError();
+                }
                 chThdSleepUntil(slp_until);
             }
 

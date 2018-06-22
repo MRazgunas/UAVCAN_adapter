@@ -13,5 +13,7 @@ namespace Hardware {
     void setStatusLed(bool on);
     void setCANLed(bool on);
 
+    void restart_i2c();
+
     os::watchdog::Timer init();
 }

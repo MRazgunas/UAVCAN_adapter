@@ -3,6 +3,8 @@
 #include "ch.h"
 #include "hal.h"
 
+#include <hardware.hpp>
+
 
 class driver_4525D {
 private:
@@ -22,24 +24,34 @@ private:
     float _last_pressure_pa = 0.0f; //Last measurement in Pa
     float _last_temperature = 0.0f; //Last temperature measurement
 
+    bool _receive_data(uint8_t *buf, size_t n, uint8_t timeout_ms) {
+        i2cAcquireBus(_driver);
+        msg_t res = i2cMasterReceiveTimeout(_driver, _address, buf, n, MS2ST(timeout_ms));
+        i2cReleaseBus(_driver);
+        if(res != MSG_OK) {
+            Hardware::restart_i2c();
+            return false;
+        }
+        return true;
+    }
+
     void _start_measurement() {
         _measurement_started = 0;
-        i2cAcquireBus(_driver);
         uint8_t cmd[2];
-        if(i2cMasterReceiveTimeout(_driver, _address, cmd, 2, MS2ST(10)) == MSG_OK) {
+        if(_receive_data(cmd, 2, 10)) {
             _measurement_started = chVTGetSystemTime();
+            _healthy = true;
+        } else {
+            _healthy = false;
         }
-        i2cReleaseBus(_driver);
     }
 
     void _get_data() {
         uint8_t data[4];
 
         _measurement_started = 0;
-        i2cAcquireBus(_driver);
-        msg_t res = i2cMasterReceiveTimeout(_driver, _address, data, 4, MS2ST(5));
-        i2cReleaseBus(_driver);
-        if(res != MSG_OK) {
+
+        if(!_receive_data(data, 4, 5)) {
             _healthy = false;
             return;
         }

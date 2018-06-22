@@ -31,6 +31,11 @@ namespace Hardware {
 //        palWritePad(PORT_LED_GREEN, GPIO_LED_GREEN, on);
     }
 
+    void restart_i2c() {
+        i2cStop(&I2CD1);
+        i2cStart(&I2CD1, &i2cfg1);
+    }
+
     static void* const ConfigStorageAddress = reinterpret_cast<void*>(0x08000000 + (256 * 1024) - 1024);
     constexpr unsigned ConfigStorageSize = 1024;
 
