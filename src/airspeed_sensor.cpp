@@ -28,6 +28,11 @@ class AirspeedSenorThread : public chibios_rt::BaseStaticThread<1024> {
         raw_air_data.differential_pressure = press_pa;
         raw_air_data.differential_pressure_sensor_temperature = temp;
 
+        raw_air_data.pitot_temperature = NAN;
+        raw_air_data.static_air_temperature = NAN;
+        raw_air_data.static_pressure = NAN;
+        raw_air_data.static_pressure_sensor_temperature = NAN;
+
         auto& node = Node::getNode();
         static uavcan::Publisher<uavcan::equipment::air_data::RawAirData> raw_air_pub(node);
 
@@ -53,21 +58,22 @@ public:
             while(true) {
                 slp_until += US2ST(pub_perion_usec.get());
 
-                float press, temp;
+                float press = NAN;
+                float temp = NAN;
                 _driver.poll();
                 bool res = _driver.get_pressure(press);
                 _driver.get_temperature(temp);
 
-                if(res) {
+                if(!res) {
+                    Node::getNode().setHealthError();
+                } else {
                     temp += kelvin_offset;
                     Node::getNode().setHealthOk();
-                    publish(press, temp);
-                } else {
-                    Node::getNode().setHealthError();
                 }
+                publish(press, temp);
+
                 chThdSleepUntil(slp_until);
             }
-
         }
     }
 } airspeed_sensor_thread;
