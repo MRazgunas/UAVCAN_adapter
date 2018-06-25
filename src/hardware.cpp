@@ -10,6 +10,8 @@
 
 namespace Hardware {
 
+    static bool reboot_requested = false;
+
     static const I2CConfig i2cfg1 = {
         OPMODE_I2C,
         400000,
@@ -34,6 +36,14 @@ namespace Hardware {
     void restart_i2c() {
         i2cStop(&I2CD1);
         i2cStart(&I2CD1, &i2cfg1);
+    }
+
+    bool isRebootRequested() {
+        return reboot_requested;
+    }
+
+    void requestReboot() {
+        reboot_requested = true;
     }
 
     static void* const ConfigStorageAddress = reinterpret_cast<void*>(0x08000000 + (256 * 1024) - 1024);

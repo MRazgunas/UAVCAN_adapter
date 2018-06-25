@@ -116,7 +116,7 @@ auto onFirmwareUpdateRequestedFromUAVCAN(
      */
     bootloader_interface::writeSharedStruct(shared);
 
-    NVIC_SystemReset();
+    Hardware::requestReboot();
 
     already_in_progress = true;
 
@@ -145,8 +145,14 @@ int main(void) {
 
     airspeed_sensor::init();
 
-    while (true) {
+    while(!Hardware::isRebootRequested()) {
         wdt.reset();
         chThdSleepMilliseconds(500);
     }
+
+    for(int i = 0; i < 6; i++) { //Wait 2.5s for systems to shutdown
+        wdt.reset();
+        chThdSleepMilliseconds(500);
+    }
+    NVIC_SystemReset();
 }

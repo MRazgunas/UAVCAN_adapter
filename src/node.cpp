@@ -134,6 +134,15 @@ namespace Node {
         }
     } param_manager;
 
+    class RestartRequestHandler: public uavcan::IRestartRequestHandler {
+        bool handleRestartRequest(uavcan::NodeID request_source) override
+        {
+            (void) request_source;
+            Hardware::requestReboot();
+            return true;
+        }
+    } restart_request_handler;
+
   /*
    * Firmware update handler
    */
@@ -196,6 +205,8 @@ namespace Node {
 
         uavcan::ParamServer server(getNode());
         server.start(&param_manager);
+
+        getNode().setRestartRequestHandler(&restart_request_handler);
 
         const int begin_firmware_update_res = getBeginFirmwareUpdateServer().start(&handleBeginFirmwareUpdateRequest);
 

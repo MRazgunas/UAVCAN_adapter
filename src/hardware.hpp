@@ -15,5 +15,8 @@ namespace Hardware {
 
     void restart_i2c();
 
+    bool isRebootRequested();
+    void requestReboot();
+
     os::watchdog::Timer init();
 }

@@ -46,7 +46,7 @@ public:
     void main() override {
         setName("airspeed_sensor");
 
-        while(true) {
+        while(!Hardware::isRebootRequested()) {
             if(!_driver.init()) {
                 //Driver init failed.
                 continue;
@@ -55,7 +55,7 @@ public:
             _driver.set_psi_range(psi_range.get());
 
             systime_t slp_until = chVTGetSystemTime();
-            while(true) {
+            while(!Hardware::isRebootRequested()) {
                 slp_until += US2ST(pub_perion_usec.get());
 
                 float press = NAN;
