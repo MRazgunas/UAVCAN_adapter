@@ -5,7 +5,7 @@
 
 # Compiler options here.
 ifeq ($(USE_OPT),)	
-  USE_OPT = -O2 -ggdb -fomit-frame-pointer -falign-functions=16
+  USE_OPT = -O1 -ggdb -fomit-frame-pointer -falign-functions=16
   USE_OPT += -nodefaultlibs -lc -lgcc -lm
 endif
 
@@ -134,20 +134,23 @@ GIT_HASH = $(shell git rev-parse --short HEAD)
 BOOTLOADER_SIZE = 32768
 DDEFS += -DCORTEX_VTOR_INIT=$(BOOTLOADER_SIZE)            \
          -DCRT1_AREAS_NUMBER=0
-		 
+
+ifeq ($(DEBUG_BUILD), 1)
+    BUILD_OPT = -DDEBUG_BUILD=1 \
+               -DDISABLE_WATCHDOG=1
+else
+    BUILD_OPT = -DRELEASE_BUILD=1
+endif 
 UDEFS += -DUAVCAN_STM32_CHIBIOS=1 \
-		 -DUAVCAN_STM32_TIMER_NUMBER=6 \
-		 -DUAVCAN_STM32_NUM_IFACES=1 \
-		 -DUAVCAN_CPP_VERSION=UAVCAN_CPP11 \
-		 -DGIT_HASH=0x$(GIT_HASH) \
-		 -DFW_VERSION_MAJOR=$(FW_VERSION_MAJOR) \
-		 -DFW_VERSION_MINOR=$(FW_VERSION_MINOR) \
-		 -DRELEASE_BUILD=1
-#		 -DDEBUG_BUILD=1 \
-#		 -DDISABLE_WATCHDOG=1
-		 
-#UDEFS += -DSHELL_CONFIG_FILE
-		 
+         -DUAVCAN_STM32_TIMER_NUMBER=6 \
+         -DUAVCAN_STM32_NUM_IFACES=1 \
+         -DUAVCAN_CPP_VERSION=UAVCAN_CPP11 \
+         -DGIT_HASH=0x$(GIT_HASH) \
+         -DFW_VERSION_MAJOR=$(FW_VERSION_MAJOR) \
+         -DFW_VERSION_MINOR=$(FW_VERSION_MINOR)
+         
+UDEFS += $(BUILD_OPT)
+
 include $(UAVCAN)/libuavcan/include.mk
 CPPSRC += $(LIBUAVCAN_SRC)
 UINCDIR += $(LIBUAVCAN_INC)
